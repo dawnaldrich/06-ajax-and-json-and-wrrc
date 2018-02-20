@@ -20,8 +20,7 @@ Article.prototype.toHtml = function() {
   this.daysAgo = parseInt((new Date() - new Date(this.publishedOn))/60/60/24/1000);
 
   // COMMENT: What is going on in the line below? What do the question mark and colon represent? How have we seen this same logic represented previously?
-  // Not sure? Check the docs!
-  // this is a terniary if/else statement - the colon separates true adn false
+  // this is a ternary if/else statement - the colon separates true and false
   this.publishStatus = this.publishedOn ? `published ${this.daysAgo} days ago` : '(draft)';
   this.body = marked(this.body);
 
@@ -33,9 +32,8 @@ Article.prototype.toHtml = function() {
 // REVIEW: This function will take the rawData, how ever it is provided, and use it to instantiate all the articles. This code is moved from elsewhere, and encapsulated in a simply-named function for clarity.
 
 // COMMENT: Where is this function called? What does 'rawData' represent now? How is this different from previous labs?
-// loadall is being called if local storage exists. rawData represents our article data in an array of object literals. We used to retrieve from a .js file - now we're retrieving from a .json file that represents a remotej server.
+// loadall is being called in fetchAll. rawData represents our article data in an array of object literals. We used to retrieve from a .js file - now we're retrieving from a .json file that represents a remote js server.
 Article.loadAll = rawData => {
-  console.log(rawData);
   rawData.sort((a,b) => (new Date(b.publishedOn)) - (new Date(a.publishedOn)))
 
   rawData.forEach(articleObject => Article.all.push(new Article(articleObject)))
@@ -45,22 +43,25 @@ Article.loadAll = rawData => {
 Article.fetchAll = () => {
   // REVIEW: What is this 'if' statement checking for? Where was the rawData set to local storage? if local storage exists load - if not call the .json on the server.
   if (localStorage.rawData) {
-    console.log('hello');
-    Article.loadAll(JSON.parse(localStorage.getItem(rawData)));
+    console.log('in local storage');
+    let localPull = JSON.parse(localStorage.getItem('rawData'));
+    console.log(localPull);
+    localPull.forEach(element => Article.all.push(new Article(element)));
+    Article.loadAll(Article.all);
+    articleView.initIndexPage();
 
   } else
-    { 
+  {
+    // $.get('data/hackerIpsum.json')
+    // .then(data => localStorage.setItem('rawData', data))
+    // .then(data=> console.log(data))
+    // .then(data => Article.loadAll(data));
 
-
-      // $.get('data/hackerIpsum.json')
-      // .then(data => localStorage.setItem('rawData', data))
-      // .then(data=> console.log(data))
-      // .then(data => Article.loadAll(data));
-
-      $.get('data/hackerIpsum.json', function(data){
-        localStorage.setItem('rawData', JSON.stringify(data));
-        console.log(data);
-        Article.loadAll(data);
-      })
-    }
+    $.getJSON('data/hackerIpsum.json', function(data){
+      localStorage.setItem('rawData', JSON.stringify(data));
+      data.forEach(element => Article.all.push(new Article(element)));
+      Article.loadAll(Article.all);
+      articleView.initIndexPage()
+    })
+  }
 }

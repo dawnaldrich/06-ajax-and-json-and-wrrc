@@ -43,25 +43,25 @@ Article.loadAll = rawData => {
 Article.fetchAll = () => {
   // REVIEW: What is this 'if' statement checking for? Where was the rawData set to local storage? if local storage exists load - if not call the .json on the server.
   if (localStorage.rawData) {
-    console.log('in local storage');
-    let localPull = JSON.parse(localStorage.getItem('rawData'));
-    console.log(localPull);
-    localPull.forEach(element => Article.all.push(new Article(element)));
-    Article.loadAll(Article.all);
+    Article.loadAll(JSON.parse(localStorage.rawData));
     articleView.initIndexPage();
-
-  } else
-  {
-    // $.get('data/hackerIpsum.json')
+  } else {
+    $.get('/data/hackerIpsum.json')
     // .then(data => localStorage.setItem('rawData', data))
-    // .then(data=> console.log(data))
     // .then(data => Article.loadAll(data));
+      .then(rawdata => {
+        Article.loadAll(rawdata);
+        localStorage.rawdata = JSON.stringify(rawdata);
+        articleView.initIndexPage();
+      }, function(err) {
+        console.log(err);
+      });
 
-    $.getJSON('data/hackerIpsum.json', function(data){
-      localStorage.setItem('rawData', JSON.stringify(data));
-      data.forEach(element => Article.all.push(new Article(element)));
-      Article.loadAll(Article.all);
-      articleView.initIndexPage()
-    })
+    // $.getJSON('data/hackerIpsum.json', function(data){
+    //   localStorage.setItem('rawData', JSON.stringify(data));
+    //   data.forEach(element => Article.all.push(new Article(element)));
+    //   Article.loadAll(Article.all);
+    //   articleView.initIndexPage()
+    // })
   }
 }
